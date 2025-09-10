@@ -122,4 +122,141 @@ df_ph_skills = df_ph.explode("job_skills")
 4. 💵 **Highest-Paid Skills:** BigQuery, C, Flow, Sheets, and Zoom are among the highest-paid skills in the Philippine setting, all earning over **₱6M per year**.  
 5. 📊 **Most In-Demand Skills:** SQL is the most in-demand skill among data roles in the Philippines, followed by Excel and Python.
 
+# Skills Analysis 🛠️
+
+## Overview  
+This section performs **Skills Analysis** to summarize and visualize the top skills in demand in the Philippines.  
+The plots are based on the sorting and counting of different columns in the dataset.  
+The code below demonstrates how the data is filtered and processed for this analysis.
+
+### Code Example
+```python
+def plot_figure_1():
+    # Grouping the Data
+    df_skills_count = df_ph.groupby(["job_skills", "job_title_short"]).size()
+    df_skills_count = df_skills_count.reset_index(name="Skill_Count")
+    df_skills_count = df_skills_count.sort_values(by="Skill_Count", ascending=False)
+
+    # Top 3 Job Titles
+    df_job_titles = df_skills_count["job_title_short"].unique().tolist()
+    df_job_titles = sorted(df_job_titles[:3])
+
+    # Plotting Skills Count
+    fig, ax = plt.subplots(len(df_job_titles), 1)
+
+    sns.set_theme(style="ticks")
+
+    for i, job_title in enumerate(df_job_titles):
+        df_plot = df_skills_count[df_skills_count['job_title_short'] == job_title].head(5)[::-1]
+        sns.barplot(
+            data=df_plot,
+            x='Skill_Count',
+            y='job_skills',
+            ax=ax[i],
+            palette='dark:b_r'
+        )
+        ax[i].set_title(job_title)
+        ax[i].set_ylabel('')
+        ax[i].set_xlabel('Skill Count')
+        ax[i].invert_yaxis()
+        ax[i].set_xlim(0, 3000)  # uniform scale
+
+    fig.suptitle('Top Skills in Job Postings (Philippines)', fontsize=15)
+    fig.tight_layout()
+    plt.show()
+```
+## Result Plots: Bar Chart 📊
+[![Top Skills](charts/top%20skills.png)](charts/top%20skills.png)
+
+## Result Plots: Pie Chart 🥧
+[![Skill Likelihood Trend](charts/percentages.png)](charts/percentages.png)
+
+## Key Insights 💡
+
+1. 👩‍💼 **Roles Requiring More Skills:** Business Analysts, Data Analysts, and Data Engineers typically look for candidates with more skills.  
+2. 🏆 **Most Popular Skills:** Excel is most popular among Business and Data Analysts, followed by SQL; Data Engineers favor SQL and Python.  
+3. 📊 **Roles with 5+ Skills Required:** Business Analysts, Cloud Engineers, and Data Analysts often require five or more skills.  
+4. 💻 **Skill Preferences by Role:** Excel remains popular for Business and Data Analysts, while Cloud Engineers favor AWS.
+
+# Skill Trends 📊
+
+## Overview  
+This section performs **Skills Trend Analysis** to summarize and visualize the top skills in demand for Data Analysts throughout the year in the Philippines.  
+The plots are based on the sorting and counting of different columns in the dataset.  
+The code below demonstrates how the data is filtered and processed for this analysis.
+
+### Code Example
+```python
+def plot_figure_1():
+    # Generate Pivot Table
+    df_pivot = df_ph_da_skills_exploded.pivot_table(
+        index="job_posted_month_no", 
+        columns="job_skills", 
+        aggfunc="size", 
+        fill_value=0
+    )
+
+    # Reorder columns by total counts
+    df_pivot.loc["Total"] = df_pivot.sum()
+    df_pivot = df_pivot[df_pivot.loc['Total'].sort_values(ascending=False).index]
+    df_pivot = df_pivot.drop("Total")
+
+    # Convert month numbers → full month names
+    df_pivot.index = df_pivot.index.map(lambda x: calendar.month_name[x])
+    df_pivot = df_pivot.astype(int)
+
+    # Plot
+    sns.set_theme(style="whitegrid", rc={"figure.figsize": (14, 7)})
+
+    ax = sns.lineplot(
+        data=df_pivot.iloc[:, :5],  # top 5 skills
+        dashes=False,
+        palette="tab10",
+        linewidth=2.2
+    )
+
+    # Titles only (no axis labels)
+    ax.set_title(
+        "Top 5 Skills Trends for Data Analyst Roles in the Philippines",
+        fontsize=16,
+        weight="bold",
+        pad=20
+    )
+    ax.set_ylabel("")  # remove y-axis label
+    ax.set_xlabel("")  # remove x-axis label
+
+    # Use month names as x-ticks
+    ax.set_xticks(range(len(df_pivot.index)))
+    ax.set_xticklabels(df_pivot.index, rotation=45, ha="right", fontsize=10)
+    ax.yaxis.set_major_formatter(mtick.StrMethodFormatter('{x:,.0f}'))
+
+    # Legend outside for clarity
+    ax.legend(
+        title="Skills",
+        fontsize=10,
+        title_fontsize=11,
+        loc="upper left",
+        bbox_to_anchor=(1.01, 1)
+    )
+
+    # Add grid styling
+    ax.grid(alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+```
+## Result Plots: Bar Chart 📊
+[![Top 5 Trending Skills](charts/skills_trend.png)](charts/skills_trend.png)
+
+## Result Plots: Pie Chart 🥧
+[![Skill Likelihood Trend](charts/Likelihood.png)](charts/Likelihood.png)
+
+## Key Insights 💡
+1. 📈 **Peak Months:** Most skills see the highest number of postings in **January**, with Excel being the most wanted skill, followed by SQL and Python.  
+2. 📉 **Low Months:** Postings tend to dip in **March and May**, before recovering by June.  
+3. ✨ **Alteryx Spike:** Alteryx postings peak particularly in **March and October**.  
+4. 🏆 **Top Skill Percentage:** Alteryx has the highest overall percentages among the analyzed skills.
+
+
+
    
