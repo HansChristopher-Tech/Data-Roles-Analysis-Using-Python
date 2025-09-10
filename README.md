@@ -74,10 +74,10 @@ dict_column = {
     'job_health_insurance': 'Health Insurance Offered'
 }
 ```
-## Result Plots: Bar Chart 📊
+## Result Plots: 
 [![Top 5 Roles, Countries, and Companies](charts/Top%205%20data%20internatioanl.png)](charts/Top%205%20data%20internatioanl.png)
 
-## Result Plots: Pie Chart 🥧
+## Result Plots: 
 [![Opportunities for Top 5 Data Roles](charts/opportunities%20for%20the%20top%205%20data%20international.png)](charts/opportunities%20for%20the%20top%205%20data%20international.png)
 
 ## Key Insights 💡
@@ -108,10 +108,10 @@ df_ph["salary_year_avg_php"] = df_ph["salary_year_avg"] * 56
 # Explode skills for analysis
 df_ph_skills = df_ph.explode("job_skills")
 ```
-## Result Plots: Bar Chart 📊
+## Result Plots: 
 [![Salary Distributions](charts/Salary%20Distributions.png)](charts/Salary%20Distributions.png)
 
-## Result Plots: Pie Chart 🥧
+## Result Plots: 
 [![Highest Paid and Most In-Demand Skills](charts/Highest%20Paid%20and%20Most%20Demand%20Skills.png)](charts/Highest%20Paid%20and%20Most%20Demand%20Skills.png)
 
 ## Key Insights 💡
@@ -165,10 +165,10 @@ def plot_figure_1():
     fig.tight_layout()
     plt.show()
 ```
-## Result Plots: Bar Chart 📊
+## Result Plots: 
 [![Top Skills](charts/top%20skills.png)](charts/top%20skills.png)
 
-## Result Plots: Pie Chart 🥧
+## Result Plots: 
 [![Skill Likelihood Trend](charts/percentages.png)](charts/percentages.png)
 
 ## Key Insights 💡
@@ -245,10 +245,10 @@ def plot_figure_1():
     plt.tight_layout()
     plt.show()
 ```
-## Result Plots: Bar Chart 📊
+## Result Plots: 
 [![Top 5 Trending Skills](charts/skills_trend.png)](charts/skills_trend.png)
 
-## Result Plots: Pie Chart 🥧
+## Result Plots: 
 [![Skill Likelihood Trend](charts/Likelihood.png)](charts/Likelihood.png)
 
 ## Key Insights 💡
@@ -256,6 +256,126 @@ def plot_figure_1():
 2. 📉 **Low Months:** Postings tend to dip in **March and May**, before recovering by June.  
 3. ✨ **Alteryx Spike:** Alteryx postings peak particularly in **March and October**.  
 4. 🏆 **Top Skill Percentage:** Alteryx has the highest overall percentages among the analyzed skills.
+
+# Optimal Skill 🏆
+
+## Overview  
+This section identifies the **Most Optimal Skills** for Data Analysts in the Philippines based on the dataset.  
+The analysis considers both **skill demand** and **median salary**, helping to determine which skills are most valuable to learn.  
+The plots are generated from sorting, aggregating, and visualizing relevant columns in the dataset.  
+
+### Code Example
+
+```python
+# Filter only Data Analyst jobs in PH + remove NaN salaries
+df_ph_da = df[(df["job_title_short"] == "Data Analyst") & (df["job_country"] == "Philippines")].copy()
+df_ph = df_ph_da.dropna(subset=["salary_year_avg"]).copy()
+
+# Convert salary to PHP (assuming 1 USD = 56 PHP)
+df_ph["salary_year_avg_php"] = df_ph["salary_year_avg"] * 56
+df_ph_skills = df_ph.explode("job_skills")
+
+# Calculate Percentage on Job Postings that have skills
+df_ph_da_skills = (
+    df_ph_skills
+    .groupby("job_skills")
+    .agg(
+        skill_count=("job_skills", "count"),    
+        median_salary=("salary_year_avg_php", "median") 
+    )
+    .sort_values(by="skill_count", ascending=False)
+)
+
+df_DA_job_count = len(df_ph_da)  # total job postings
+df_ph_da_skills['Skills Percentage'] = (df_ph_da_skills["skill_count"] / df_DA_job_count) * 100
+
+# Keep only skills that appear in > 5 of postings
+df_ph_da_skills_high_demand = df_ph_da_skills.head(10)
+# Plot scatter
+plt.figure(figsize=(10,6))
+plt.scatter(
+    df_ph_da_skills_high_demand['Skills Percentage'], 
+    df_ph_da_skills_high_demand['median_salary'],
+    s=80, alpha=0.7
+)
+plt.xlabel('Percent of Data Analyst Jobs')
+plt.ylabel('Median Salary (₱PHP)')
+plt.title('Most Optimal Skills for Data Analysts in the Philippines')
+
+# Format y-axis as ₱xxxK
+ax = plt.gca()
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, pos: f'₱{int(y/1000000)}M'))
+
+# Add labels to points
+texts = []
+for i, txt in enumerate(df_ph_da_skills_high_demand.index):
+    texts.append(
+        plt.text(
+            df_ph_da_skills_high_demand['Skills Percentage'].iloc[i], 
+            df_ph_da_skills_high_demand['median_salary'].iloc[i], 
+            " " + txt
+        )
+    )
+# Adjust text to avoid overlap and add arrows
+adjust_text(texts, 
+            arrowprops=dict(arrowstyle="->", color="black", lw=1),
+            force_points=0.5, force_text=0.5, expand_points=(1.2,1.2))
+
+plt.show()
+```
+## Result Plots: Scatter Plot 📈
+[![Most Optimal Skills](charts/Optimal%20Skills.png)](charts/Optimal%20Skills.png)
+
+## Key Insights 💡
+1. 🏆 **Top Skills:** The most paid and in-demand skills are **PowerPoint, R, Tableau, Python, and SQL**.  
+2. 💰 **High-Paying Skills:** Excel remains a highly paid skill, with median salaries around **₱5M per year**.  
+3. 📊 **Optimal Balance:** SQL is positioned farthest to the right on the scatter plot, indicating it is both **highly paid** and **highly in-demand** among Data Analysts in the Philippines.
+
+# Conclusion 📝
+
+Based on the analyses conducted on Data Analyst roles in the Philippines:
+   - 👨‍💻 **Role Distribution:** Data Analysts dominate the job market, followed by Data Engineers and Data Scientists. Jobs are mostly concentrated in English-speaking countries, with Empreego being the top hiring company.  
+   - 💰 **Salary Insights:** Median salaries for Data Analysts range from **₱3M–₱6M per year**, with skills like BigQuery, C, Flow, Sheets, and Zoom commanding the highest pay. SQL, Excel, and Python are the most in-demand skills in the Philippine market.  
+   - 🛠️ **Skills Analysis:** Business Analysts, Data Analysts, and Data Engineers require candidates with multiple skills. Excel remains highly popular among analysts, while Cloud Engineers favor AWS.  
+   - 📊 **Skill Trends:** Excel, SQL, and Python consistently appear as top skills throughout the year. Alteryx shows spikes in demand, particularly in March and October, indicating seasonal trends.  
+   - 🏆 **Optimal Skills:** The most optimal skills for maximizing opportunities and pay are **PowerPoint, R, Tableau, Python, and SQL**, with SQL providing the best balance between high demand and high salary.
+     
+**Overall**, acquiring a combination of **high-demand technical skills** (SQL, Python, Tableau) along with **business and presentation skills** (PowerPoint, R) positions candidates for success in the Philippine Data Analyst market.  
+
+#Technical Feautures: 
+#All scripts that plotted 2 plots had these lines of code within them to help the user choose what to plot.
+```python
+# === User Choice Loop ===
+print("> What figure do you want to show (1 or 2)?: ")
+print("> Figure 1: Salary Distribution for Data Analysts in the Philippines")
+print("> Figure 2: Highest Paid Skills and Most In-Demand Skills")
+
+while True:
+    question = input("> ")
+
+    try:
+        if question == "1":
+            plot_figure_1()
+        elif question == "2":
+            plot_figure_2()
+        else:
+            print("Error: Please choose either 1 or 2")
+            continue
+    except Exception as e:
+        print(f"Error: {e}")
+        continue
+
+    again = input("Do you want to print the other chart? (Y/N): ")
+    if again.lower() in ["y", "yes"]:
+        if question == "1":
+            plot_figure_2()
+        elif question == "2":
+            plot_figure_1()
+    else:
+        break
+```
+#Credits
+##Luke Barousse for his tutorials and dataset
 
 
 
