@@ -342,21 +342,24 @@ Based on the analyses conducted on Data Analyst roles in the Philippines:
      
 **Overall**, acquiring a combination of **high-demand technical skills** (SQL, Python, Tableau) along with **business and presentation skills** (PowerPoint, R) positions candidates for success in the Philippine Data Analyst market.  
 
-#Technical Feautures: 
-#All scripts that plotted 2 plots had these lines of code within them to help the user choose what to plot.
+# Technical Features ⚙️
+
+All scripts that generate two plots include a **user choice loop**, allowing the user to select which figure to display.  
+This makes the scripts interactive and easy to navigate.
+
 ```python
 # === User Choice Loop ===
-print("> What figure do you want to show (1 or 2)?: ")
+print("> Which figure would you like to display (1 or 2)?: ")
 print("> Figure 1: Salary Distribution for Data Analysts in the Philippines")
 print("> Figure 2: Highest Paid Skills and Most In-Demand Skills")
 
 while True:
-    question = input("> ")
+    choice = input("> ")
 
     try:
-        if question == "1":
+        if choice == "1":
             plot_figure_1()
-        elif question == "2":
+        elif choice == "2":
             plot_figure_2()
         else:
             print("Error: Please choose either 1 or 2")
@@ -365,17 +368,19 @@ while True:
         print(f"Error: {e}")
         continue
 
-    again = input("Do you want to print the other chart? (Y/N): ")
+    again = input("Do you want to view the other chart? (Y/N): ")
     if again.lower() in ["y", "yes"]:
-        if question == "1":
+        if choice == "1":
             plot_figure_2()
-        elif question == "2":
+        elif choice == "2":
             plot_figure_1()
     else:
         break
 ```
-#Credits
-##Luke Barousse for his tutorials and dataset
+# Credits 🙏
+
+- **Luke Barousse** – for his insightful tutorials and for providing the original dataset that served as the foundation for this project.
+
 
 
 
